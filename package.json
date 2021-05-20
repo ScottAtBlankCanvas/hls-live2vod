@@ -1,0 +1,33 @@
+{
+  "name": "hls-live2vod",
+  "version": "1.0.0",
+  "description": "download HLS media and create a VOD asset",
+  "main": "src/cli.js",
+  "bin": {
+    "hls-live2vod": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://ScottAtBlankCanvas@github.com/ScottAtBlankCanvas/hls-live2vod.git"
+  },
+  "author": "Scott Kellicker",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ScottAtBlankCanvas/hls-live2vod/issues"
+  },
+  "homepage": "https://github.com/ScottAtBlankCanvas/hls-live2vod#readme",
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "filenamify": "^4.3.0",
+    "fs": "^0.0.1-security",
+    "m3u8-parser": "^4.6.0",
+    "mkdirp": "^0.5.5",
+    "path": "^0.12.7",
+    "requestretry": "^5.0.0",
+    "write-data": "^1.0.2",
+    "yargs": "^17.0.1"
+  }
+}

@@ -28,6 +28,7 @@ const options = {
 };
 
 start(options).then(function() {
+  console.log('start.then');
   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 
   console.log('Operation completed successfully in', timeTaken, 'seconds.');

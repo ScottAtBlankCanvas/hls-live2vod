@@ -5,15 +5,19 @@ const utils = require('./utils');
 
 const startTime = Date.now();
 
+let manifest = {};
+manifest.duration = 0;
+manifest.visited = [];
+
 const loopPlaylist = (n, ms, settings) => {
   console.log(`Wait[${n}]: ${ms} ms`);
   return new Promise((resolve) => {
     setTimeout(() => {
 
-      WalkSubPlaylist(settings)
+      WalkSubPlaylist(settings, manifest)
           .then(function(resources) {
             //console.log('Downloading data...');
-            return WriteData(resources, 8);
+            return WriteData(resources, 8);  // TODO: get rid of magic number
           });
 
       resolve(ms);
@@ -21,13 +25,14 @@ const loopPlaylist = (n, ms, settings) => {
   });
 }
 
-// TODO: First time, no delay
-// TODO: pass in manifest so we can capture all the data (like duration?)
 
 const doNextPromise = (n, settings) => {
-  loopPlaylist(n, 2000, settings)
+  let ms = 3000;
+  if (n == 0) ms = 0;
+
+  loopPlaylist(n, ms, settings)
     .then(x => {
-      console.log(`Execute[${n}]`);
+      console.log(`Execute[${n}] dur:`+manifest.duration);
       n++;
 
       // TODO: stop when we get to required number of
@@ -39,6 +44,7 @@ const doNextPromise = (n, settings) => {
 // Starts first promise, which will chain several others
 const main = function(options) {
   //console.log('Gathering Manifest data...');
+
 
   const settings = {
     basedir: options.output,

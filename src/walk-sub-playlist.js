@@ -6,7 +6,7 @@ const utils = require('./utils');
 
 
 
-const walkSubPlaylist = function(options) {
+const walkSubPlaylist = function(options, manifest) {
   return new Promise(function(resolve, reject) {
     const {
       basedir,
@@ -32,8 +32,6 @@ const walkSubPlaylist = function(options) {
 
     let resources = [];
 
-    const manifest = {};
-    manifest.duration = 0;
 
     if (uri) {
       manifest.uri = utils.joinURI(baseuri, uri);
@@ -42,8 +40,6 @@ const walkSubPlaylist = function(options) {
       manifest.file = path.join(basedir, uri);
       console.log('manifest.file:'+manifest.file);
     }
-
-//    visitedUrls[manifest.uri] = manifest;
 
     let requestPromise = request({
       url: manifest.uri,
@@ -87,14 +83,24 @@ const walkSubPlaylist = function(options) {
           if (!s.uri) {
             return;
           }
+          // If already processed, skip it
+          if (manifest.visited[s.uri]) {
+            console.log('Already downloaded uri:'+s.uri);
+            return;
+          }
+
           // put segments in manifest-name/segment-name.ts
 //          console.log('XXX manifest.file:'+manifest.file);
 //          console.log('XXX  uri:'+s.uri);
 
           s.file = path.join(path.dirname(manifest.file), utils.urlBasename(s.uri));
 //          console.log('XXX :'+s);
+
 console.log('sub file:'+s.file);
 console.log('sub  uri:'+s.uri);
+console.log('VISITED uri:'+s.uri);
+
+          manifest.visited[s.uri] = manifest;
 
 //console.log('XXX file:'+s.file+" ["+manifest.file+":"+s.uri+']');
           if (!utils.isAbsolute(s.uri)) {

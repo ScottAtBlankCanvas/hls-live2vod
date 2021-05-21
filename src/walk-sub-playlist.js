@@ -12,7 +12,6 @@ const walkSubPlaylist = function(options, manifest) {
       basedir,
       baseuri,
       uri,
-      manifestIndex = 0,
       onError = function(err, errUri, resources, res, rej) {
         console.log(err);
         // Avoid adding the top level uri to nested errors
@@ -35,10 +34,10 @@ const walkSubPlaylist = function(options, manifest) {
 
     if (uri) {
       manifest.uri = utils.joinURI(baseuri, uri);
-      console.log('manifest.uri:'+manifest.uri);
+      //console.log('manifest.uri:'+manifest.uri);
 
       manifest.file = path.join(basedir, uri);
-      console.log('manifest.file:'+manifest.file);
+      //console.log('manifest.file:'+manifest.file);
     }
 
     let requestPromise = request({
@@ -58,9 +57,9 @@ const walkSubPlaylist = function(options, manifest) {
       }
       // Only push manifest uris that get a non 200 and don't timeout
 
-      console.log('-------');
-      console.log(manifest.uri);
-      console.log(response.body);
+      // console.log('-------');
+      // console.log(manifest.uri);
+      // console.log(response.body);
 
       resources.push(manifest);
 
@@ -85,7 +84,7 @@ const walkSubPlaylist = function(options, manifest) {
           }
           // If already processed, skip it
           if (manifest.visited[s.uri]) {
-            console.log('Already downloaded uri:'+s.uri);
+//            console.log('Already downloaded uri:'+s.uri);
             return;
           }
 
@@ -96,9 +95,9 @@ const walkSubPlaylist = function(options, manifest) {
           s.file = path.join(path.dirname(manifest.file), utils.urlBasename(s.uri));
 //          console.log('XXX :'+s);
 
-console.log('sub file:'+s.file);
-console.log('sub  uri:'+s.uri);
-console.log('VISITED uri:'+s.uri);
+// console.log('sub file:'+s.file);
+// console.log('sub  uri:'+s.uri);
+console.log('['+manifest.uri+'] VISITED: '+s.uri);
 
           manifest.visited[s.uri] = manifest;
 

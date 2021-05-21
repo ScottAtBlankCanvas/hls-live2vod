@@ -9,14 +9,15 @@ let manifest = {};
 manifest.duration = 0;
 manifest.visited = [];
 
-const loopPlaylist = (n, ms, settings) => {
-  console.log(`Wait[${n}]: ${ms} ms`);
+let settings = {};
+
+const sleepThenWalkPlaylist = (ms) => {
+  console.log(`Wait: ${ms} ms`);
   return new Promise((resolve) => {
     setTimeout(() => {
 
       WalkSubPlaylist(settings, manifest)
           .then(function(resources) {
-            //console.log('Downloading data...');
             return WriteData(resources, 8);  // TODO: get rid of magic number
           });
 
@@ -26,37 +27,36 @@ const loopPlaylist = (n, ms, settings) => {
 }
 
 
-const doNextPromise = (n, settings) => {
+const doNextPromise = (count) => {
   let ms = 3000;
-  if (n == 0) ms = 0;
+  if (count == 0) ms = 0;
+  if (manifest && manifest.parsed && manifest.parsed.targetDuration)
+    ms = 1000 * manifest.parsed.targetDuration;
 
-  loopPlaylist(n, ms, settings)
+  sleepThenWalkPlaylist(ms)
     .then(x => {
-      console.log(`Execute[${n}] dur:`+manifest.duration);
-      n++;
+      //console.log(`Execute[${count}] dur:`+manifest.duration+' neededSeconds:'+settings.seconds);
+      count++;
 
-      // TODO: stop when we get to required number of
-      if (n < 3)
-        doNextPromise(n, settings)
+      if (manifest.duration < settings.seconds)
+        doNextPromise(count)
     })
 }
 
 // Starts first promise, which will chain several others
 const main = function(options) {
-  //console.log('Gathering Manifest data...');
-
-
-  const settings = {
+  settings = {
     basedir: options.output,
     uri: options.input,
-    baseuri: options.baseuri
+    baseuri: options.baseuri,
+    seconds: options.seconds
   };
 
-  console.log('settings:'+settings);
+  // console.log('settings:');
+  // console.log(settings);
 
   return new Promise((resolve, reject) => {
-    console.log('Initial');
-    doNextPromise(0, settings);
+    doNextPromise(0);
   })
 };
 

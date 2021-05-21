@@ -24,7 +24,8 @@ const startTime = Date.now();
 const options = {
   input: args.url,
   baseuri: args.baseuri,
-  output
+  output,
+  seconds: args.seconds
 };
 
 start(options).then(function() {

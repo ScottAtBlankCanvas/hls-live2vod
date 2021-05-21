@@ -45,8 +45,8 @@ const WriteData = function(resources, concurrency) {
   const operations = [];
 
   resources.forEach(function(r) {
-    console.log(r.duration+":"+r.uri);
-//    console.log(r);
+//    console.log(r.duration+":"+r.uri);
+
     if (r.content) {
       operations.push(function() {
         return writeFile(r.file, r.content);
@@ -54,7 +54,6 @@ const WriteData = function(resources, concurrency) {
     } else if (r.uri && inProgress.indexOf(r.uri) === -1) {
       operations.push(function() {
         return requestFile(r.uri).then(function(content) {
-          //console.log('2 requestFile: '+r.uri + " --> " + r.file);
           return writeFile(r.file, content);
         });
       });

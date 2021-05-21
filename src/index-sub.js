@@ -9,6 +9,7 @@ let manifest = {};
 manifest.duration = 0;
 manifest.visited = [];
 
+
 let settings = {};
 
 const sleepThenWalkPlaylist = (ms) => {
@@ -18,7 +19,7 @@ const sleepThenWalkPlaylist = (ms) => {
 
       WalkSubPlaylist(settings, manifest)
           .then(function(resources) {
-            return WriteData(resources, 8);  // TODO: get rid of magic number
+            return WriteData(resources, 2);  // TODO: get rid of magic number
           });
 
       resolve(ms);

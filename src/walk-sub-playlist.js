@@ -65,8 +65,58 @@ const walkSubPlaylist = function(options, manifest) {
 
       manifest.content = response.body;
       manifest.parsed = utils.parseM3u8Manifest(manifest.content);
+ //console.log(manifest.content);
+
+// console.log('parsed');
+// console.log(manifest.parsed);
 
       manifest.parsed.segments = manifest.parsed.segments || [];
+
+      // Now add segments to the manifest VOD
+      if (!manifest.vod) {
+        // first playlist, use this for the starting point for the VOD playlist
+        manifest.vod = manifest.parsed;
+        // And remove some items that do not apply to VOD
+        delete manifest.vod.foobar;
+        delete manifest.vod.serverControl;
+        delete manifest.vod.partInf;
+        delete manifest.vod.partTargetDuration;
+        delete manifest.vod.renditionReports;
+        delete manifest.vod.preloadSegment;
+
+        // Its a VOD
+        manifest.vod.endList = true;
+
+        // remove parts
+        manifest.parsed.segments.forEach(function(s) {
+          // Modify the segment so it will be correct for VOD
+          delete s.parts;
+        });
+
+      }
+      else {
+        // after first time, add new segments to the VOD playlist
+        manifest.parsed.segments.forEach(function(s) {
+          if (!s.uri || !s.map) {
+            return;
+          }
+          // If already processed, skip it
+          if (manifest.visited[s.uri]) {
+  //            console.log('Already downloaded uri:'+s.uri);
+            return;
+          }
+
+          // Modify the segment so it will be correct for VOD
+          if (s.parts)
+            delete s.parts;
+
+//console.log('s: '+s.uri);
+          manifest.vod.segments.push(s);
+        });
+
+      }
+      console.log('vod');
+      console.log(manifest.vod);
 
       const initSegments = [];
 

@@ -3,7 +3,7 @@ const request = require('requestretry');
 const path = require('path');
 
 const utils = require('./utils');
-
+const hlsGenerator = require('./hls-generator');
 
 
 const walkSubPlaylist = function(options, manifest) {
@@ -65,7 +65,7 @@ const walkSubPlaylist = function(options, manifest) {
 
       manifest.content = response.body;
       manifest.parsed = utils.parseM3u8Manifest(manifest.content);
- //console.log(manifest.content);
+ console.log(manifest.content);
 
 // console.log('parsed');
 // console.log(manifest.parsed);
@@ -115,8 +115,8 @@ const walkSubPlaylist = function(options, manifest) {
         });
 
       }
-      console.log('vod');
-      console.log(manifest.vod);
+      // console.log('vod');
+      // console.log(manifest.vod);
 
       const initSegments = [];
 
@@ -138,37 +138,25 @@ const walkSubPlaylist = function(options, manifest) {
             return;
           }
 
-          // put segments in manifest-name/segment-name.ts
-//          console.log('XXX manifest.file:'+manifest.file);
-//          console.log('XXX  uri:'+s.uri);
-
           s.file = path.join(path.dirname(manifest.file), utils.urlBasename(s.uri));
-//          console.log('XXX :'+s);
-
-// console.log('sub file:'+s.file);
-// console.log('sub  uri:'+s.uri);
-console.log('['+manifest.uri+'] VISITED: '+s.uri);
 
           manifest.visited[s.uri] = manifest;
 
-//console.log('XXX file:'+s.file+" ["+manifest.file+":"+s.uri+']');
-          if (!utils.isAbsolute(s.uri)) {
-            s.uri = utils.joinURI(path.dirname(manifest.uri), s.uri);
-          }
-          if (manifest.content) {
-            manifest.content = Buffer.from(manifest.content.toString().replace(
-              s.uri,
-              path.relative(path.dirname(manifest.file), s.file)
-            ));
+          s.fullUri = s.uri;
+          if (!utils.isAbsolute(s.fullUri)) {
+            s.fullUri = utils.joinURI(path.dirname(manifest.uri), s.fullUri);
           }
 
-          // TODO: add up duration when we download the segment??
           if (typeof s.duration !== 'undefined')
             manifest.duration += s.duration;
-          //console.log("  DUR: "+manifest.uri+"  : "+manifest.duration);
 
           resources.push(s);
         });
+
+        if (manifest.content) {
+          manifest.content = hlsGenerator(manifest.vod);
+        }
+
 
         resolve(resources);
     })

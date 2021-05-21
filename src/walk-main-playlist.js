@@ -44,6 +44,8 @@ const walkMainPlaylist = function(options) {
 
     console.log('walkMainPlaylist uri:'+uri);
 
+console.log(options);
+
     let resources = [];
     const manifest = {parent};
     manifest.duration = 0;

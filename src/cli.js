@@ -2,7 +2,7 @@
 const path = require('path');
 const yargs = require("yargs");
 //const start = require('./index');
-const start = require('./index-sub');
+const start = require('./walk-sub-playlist');
 
 const args = yargs
  .usage("Usage: -u <url> [-bu <baseuri>]-o <output> -s <seconds>")

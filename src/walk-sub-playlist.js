@@ -9,18 +9,12 @@ const WriteData = require('./write-data');
 
 const startTime = Date.now();
 
-let manifest = {};
-manifest.duration = 0;
-manifest.visited = [];
 
-
-let settings = {};
-
-const sleepThenWalkPlaylist = (ms) => {
+const sleepThenWalkPlaylist = (ms, settings, manifest) => {
   console.log(`Wait: ${ms} ms`);
   return new Promise((resolve) => {
+console.log('setTimeout');
     setTimeout(() => {
-
       walkSubPlaylist(settings, manifest)
           .then(function(resources) {
             return WriteData(resources, 2);  // TODO: get rid of magic number
@@ -32,24 +26,35 @@ const sleepThenWalkPlaylist = (ms) => {
 }
 
 
-const doNextPromise = (count) => {
+const doNextPromise = (count, manifest, settings) => {
+  console.log('doNextPromise:'+count);
   let ms = 3000;
   if (count == 0) ms = 0;
   if (manifest && manifest.parsed && manifest.parsed.targetDuration)
     ms = 1000 * manifest.parsed.targetDuration;
 
-  sleepThenWalkPlaylist(ms)
+  sleepThenWalkPlaylist(ms, settings, manifest)
     .then(x => {
-      //console.log(`Execute[${count}] dur:`+manifest.duration+' neededSeconds:'+settings.seconds);
+      console.log(`Execute[${count}] dur:`+manifest.duration+' neededSeconds:'+settings.seconds);
       count++;
 
       if (manifest.duration < settings.seconds)
-        doNextPromise(count)
+        doNextPromise(count, manifest, settings)
     })
 }
 
 // Starts first promise, which will chain several others
 const main = function(options) {
+  console.log("walk-sub-playlist.main");
+  console.log(options);
+
+  let manifest = {};
+  manifest.duration = 0;
+  manifest.visited = [];
+
+
+  let settings = {};
+
   settings = {
     basedir: options.output,
     uri: options.input,
@@ -61,7 +66,7 @@ const main = function(options) {
   console.log(settings);
 
   return new Promise((resolve, reject) => {
-    doNextPromise(0);
+    doNextPromise(0, manifest, settings);
   })
 };
 
@@ -70,7 +75,12 @@ const main = function(options) {
 
 
 const walkSubPlaylist = function(options, manifest) {
+  console.log('walkSubPlaylist (b4)');
+  console.log(options);
+
   return new Promise(function(resolve, reject) {
+    console.log('walkSubPlaylist (pr)');
+
     const {
       basedir,
       baseuri,
@@ -97,10 +107,10 @@ const walkSubPlaylist = function(options, manifest) {
 
     if (uri) {
       manifest.uri = utils.joinURI(baseuri, uri);
-      //console.log('manifest.uri:'+manifest.uri);
+      console.log('manifest.uri:'+manifest.uri);
 
       manifest.file = path.join(basedir, uri);
-      //console.log('manifest.file:'+manifest.file);
+      console.log('manifest.file:'+manifest.file);
     }
 
     let requestPromise = request({
@@ -128,58 +138,15 @@ const walkSubPlaylist = function(options, manifest) {
 
       manifest.content = response.body;
       manifest.parsed = utils.parseM3u8Manifest(manifest.content);
- console.log(manifest.content);
+ //console.log(manifest.content);
 
 // console.log('parsed');
 // console.log(manifest.parsed);
 
       manifest.parsed.segments = manifest.parsed.segments || [];
 
-      // Now add segments to the manifest VOD
-      if (!manifest.vod) {
-        // first playlist, use this for the starting point for the VOD playlist
-        manifest.vod = manifest.parsed;
-        // And remove some items that do not apply to VOD
-        delete manifest.vod.foobar;
-        delete manifest.vod.serverControl;
-        delete manifest.vod.partInf;
-        delete manifest.vod.partTargetDuration;
-        delete manifest.vod.renditionReports;
-        delete manifest.vod.preloadSegment;
+      manageVODManifest(manifest);
 
-        // Its a VOD
-        manifest.vod.endList = true;
-
-        // remove parts
-        manifest.parsed.segments.forEach(function(s) {
-          // Modify the segment so it will be correct for VOD
-          delete s.parts;
-        });
-
-      }
-      else {
-        // after first time, add new segments to the VOD playlist
-        manifest.parsed.segments.forEach(function(s) {
-          if (!s.uri || !s.map) {
-            return;
-          }
-          // If already processed, skip it
-          if (manifest.visited[s.uri]) {
-  //            console.log('Already downloaded uri:'+s.uri);
-            return;
-          }
-
-          // Modify the segment so it will be correct for VOD
-          if (s.parts)
-            delete s.parts;
-
-//console.log('s: '+s.uri);
-          manifest.vod.segments.push(s);
-        });
-
-      }
-      // console.log('vod');
-      // console.log(manifest.vod);
 
       const initSegments = [];
 
@@ -190,38 +157,38 @@ const walkSubPlaylist = function(options, manifest) {
         }
       });
 
-        // SEGMENTS
-        manifest.parsed.segments.forEach(function(s, i) {
-          if (!s.uri) {
-            return;
-          }
-          // If already processed, skip it
-          if (manifest.visited[s.uri]) {
+      // SEGMENTS
+      manifest.parsed.segments.forEach(function(s, i) {
+        if (!s.uri) {
+          return;
+        }
+        // If already processed, skip it
+        if (manifest.visited[s.uri]) {
 //            console.log('Already downloaded uri:'+s.uri);
-            return;
-          }
-
-          s.file = path.join(path.dirname(manifest.file), utils.urlBasename(s.uri));
-
-          manifest.visited[s.uri] = manifest;
-
-          s.fullUri = s.uri;
-          if (!utils.isAbsolute(s.fullUri)) {
-            s.fullUri = utils.joinURI(path.dirname(manifest.uri), s.fullUri);
-          }
-
-          if (typeof s.duration !== 'undefined')
-            manifest.duration += s.duration;
-
-          resources.push(s);
-        });
-
-        if (manifest.content) {
-          manifest.content = hlsGenerator(manifest.vod);
+          return;
         }
 
+        s.file = path.join(path.dirname(manifest.file), utils.urlBasename(s.uri));
 
-        resolve(resources);
+        manifest.visited[s.uri] = manifest;
+
+        s.fullUri = s.uri;
+        if (!utils.isAbsolute(s.fullUri)) {
+          s.fullUri = utils.joinURI(path.dirname(manifest.uri), s.fullUri);
+        }
+
+        if (typeof s.duration !== 'undefined')
+          manifest.duration += s.duration;
+
+        resources.push(s);
+      });
+
+      if (manifest.content) {
+        manifest.content = hlsGenerator(manifest.vod);
+      }
+
+
+      resolve(resources);
     })
       .catch(function(err) {
         onError(err, manifest.uri, resources, resolve, reject);
@@ -231,6 +198,49 @@ const walkSubPlaylist = function(options, manifest) {
     console.log(error);
   })
 };
+
+const manageVODManifest = function(manifest) {
+
+  // Now add segments to the manifest VOD
+  if (!manifest.vod) {
+    // first playlist, use this for the starting point for the VOD playlist
+    manifest.vod = manifest.parsed;
+
+    // Remove some items that do not apply to VOD we are creating...
+    // for example, LLHLS features
+    delete manifest.vod.serverControl;
+    delete manifest.vod.partInf;
+    delete manifest.vod.partTargetDuration;
+    delete manifest.vod.renditionReports;
+    delete manifest.vod.preloadSegment;
+
+    // Its a VOD
+    manifest.vod.endList = true;
+
+    // remove parts from segments
+    manifest.parsed.segments.forEach(function(s) {
+      // Modify the segment so it will be correct for VOD
+      delete s.parts;
+    });
+
+  }
+  else {
+    // after first time, add new segments to the VOD playlist
+    manifest.parsed.segments.forEach(function(s) {
+      if (!s.uri || !s.map || manifest.visited[s.uri]) {
+        return;
+      }
+
+      // Remove parts if segment has them as not useful in vod
+      if (s.parts)
+        delete s.parts;
+
+      manifest.vod.segments.push(s);
+    });
+
+  }
+};
+
 
 //module.exports = walkSubPlaylist;
 module.exports = main;

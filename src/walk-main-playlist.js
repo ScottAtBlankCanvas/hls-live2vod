@@ -23,6 +23,8 @@ const collectPlaylists = function(parsed) {
 
 const walkMainPlaylist = function(options) {
   return new Promise(function(resolve, reject) {
+    console.log('> walkMainPlaylist.promise');
+
     const {
       basedir,
       uri,
@@ -109,7 +111,7 @@ console.log(options);
     });
 
     requestPromise.then(function(response) {
-      console.log('resp:'+response.statusCode);
+      console.log('> requestPromise.then resp:'+response.statusCode);
       if (response.statusCode !== 200) {
         const manifestError = new Error(response.statusCode + '|' + manifest.uri);
 

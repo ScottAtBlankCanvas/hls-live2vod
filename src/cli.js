@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 const path = require('path');
 const yargs = require("yargs");
-//const start = require('./index');
-const start = require('./walk-sub-playlist');
+const start = require('./index');
+//const start = require('./walk-sub-playlist');
 
 const args = yargs
  .usage("Usage: -u <url> [-bu <baseuri>]-o <output> -s <seconds>")
@@ -33,7 +33,7 @@ start(options).then(function() {
   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 
   console.log('Operation completed successfully in', timeTaken, 'seconds.');
-  process.exit(0);
+//  process.exit(0);  // TODO: was causing this to not run downlaoding.  somehow finish sub playlists before resolv ing main
 }).catch(function(error) {
   console.error('ERROR', error);
   process.exit(1);

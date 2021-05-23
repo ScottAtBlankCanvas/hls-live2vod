@@ -49,18 +49,15 @@ const hlsGenerator = function(input) {
   delete manifest.endList;
 
 
-  // Not expected to handle.  Remove them
+  // Not expected to handle.  Remove them so the warning is not triggered
+  delete manifest.allowCache;
+  delete manifest.discontinuityStarts;
+  delete manifest.discontinuitySequence;
 
-
-//    #EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=24,PART-HOLD-BACK=3.012
-//    #EXT-X-PART-INF:PART-TARGET=1.004000
-
-
-
-  // console.log('hlsGen');
-  // console.log(manifest);
-  console.log('Unhandled in hls-generator:');
-  console.log(manifest);
+  if (Object.keys(manifest).length > 0) {
+    console.log('Unhandled in hls-generator:');
+    console.log(manifest);
+  }
 
   return s;
 };

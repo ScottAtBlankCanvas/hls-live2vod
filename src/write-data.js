@@ -3,14 +3,13 @@ const Promise = require('bluebird');
 const mkdirp = Promise.promisify(require('mkdirp'));
 const request = require('requestretry');
 const fs = Promise.promisifyAll(require('fs'));
-//const AesDecrypter = require('aes-decrypter').Decrypter;
 const path = require('path');
 
 const writeFile = function(file, content) {
   return mkdirp(path.dirname(file)).then(function() {
     return fs.writeFileAsync(file, content);
   }).then(function() {
-    console.log('Finished: ' + path.relative('.', file));
+    console.log('Downloaded: ' + path.relative('.', file));
   });
 };
 

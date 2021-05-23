@@ -10,10 +10,56 @@ const WriteData = require('./write-data');
 const startTime = Date.now();
 
 
+// Starts first promise, which will chain several others
+const main = function(options) {
+
+  let manifest = {
+    duration: 0,
+    visited: []
+  };
+
+  let settings = {
+    basedir: options.output,
+    uri: options.input,
+    baseuri: options.baseuri,
+    seconds: options.seconds
+  };
+
+  // console.log('settings:');
+  // console.log(settings);
+
+  return new Promise((resolve, reject) => {
+    doNextPromise(0, manifest, settings);
+  })
+};
+
+const doNextPromise = (count, manifest, settings) => {
+//  console.log('doNextPromise:'+count);
+  let ms = 3000;
+  if (count == 0) ms = 0;
+  if (manifest && manifest.parsed && manifest.parsed.targetDuration)
+    ms = 1000 * manifest.parsed.targetDuration;
+
+  sleepThenWalkPlaylist(ms, settings, manifest)
+    .then(x => {
+      let seconds_needed = settings.seconds;
+      let seconds_downloaded = manifest.duration;
+      let uri = manifest.uri;
+
+console.log(manifest);
+
+      console.log(`Process playlist: [${uri}] seconds:${seconds_downloaded}/${seconds_needed}`);
+      count++;
+
+      if (seconds_downloaded < seconds_needed)
+        doNextPromise(count, manifest, settings)
+    })
+}
+
+
 const sleepThenWalkPlaylist = (ms, settings, manifest) => {
-  console.log(`Wait: ${ms} ms`);
+//  console.log(`Wait: ${ms} ms`);
   return new Promise((resolve) => {
-console.log('setTimeout');
     setTimeout(() => {
       walkSubPlaylist(settings, manifest)
           .then(function(resources) {
@@ -26,61 +72,14 @@ console.log('setTimeout');
 }
 
 
-const doNextPromise = (count, manifest, settings) => {
-  console.log('doNextPromise:'+count);
-  let ms = 3000;
-  if (count == 0) ms = 0;
-  if (manifest && manifest.parsed && manifest.parsed.targetDuration)
-    ms = 1000 * manifest.parsed.targetDuration;
 
-  sleepThenWalkPlaylist(ms, settings, manifest)
-    .then(x => {
-      console.log(`Execute[${count}] dur:`+manifest.duration+' neededSeconds:'+settings.seconds);
-      count++;
-
-      if (manifest.duration < settings.seconds)
-        doNextPromise(count, manifest, settings)
-    })
-}
-
-// Starts first promise, which will chain several others
-const main = function(options) {
-  console.log("walk-sub-playlist.main");
-  console.log(options);
-
-  let manifest = {};
-  manifest.duration = 0;
-  manifest.visited = [];
-
-
-  let settings = {};
-
-  settings = {
-    basedir: options.output,
-    uri: options.input,
-    baseuri: options.baseuri,
-    seconds: options.seconds
-  };
-
-  console.log('settings:');
-  console.log(settings);
-
-  return new Promise((resolve, reject) => {
-    doNextPromise(0, manifest, settings);
-  })
-};
 
 
 
 
 
 const walkSubPlaylist = function(options, manifest) {
-  console.log('walkSubPlaylist (b4)');
-  console.log(options);
-
   return new Promise(function(resolve, reject) {
-    console.log('walkSubPlaylist (pr)');
-
     const {
       basedir,
       baseuri,
@@ -107,10 +106,10 @@ const walkSubPlaylist = function(options, manifest) {
 
     if (uri) {
       manifest.uri = utils.joinURI(baseuri, uri);
-      console.log('manifest.uri:'+manifest.uri);
+      //console.log('manifest.uri:'+manifest.uri);
 
       manifest.file = path.join(basedir, uri);
-      console.log('manifest.file:'+manifest.file);
+      //console.log('manifest.file:'+manifest.file);
     }
 
     let requestPromise = request({

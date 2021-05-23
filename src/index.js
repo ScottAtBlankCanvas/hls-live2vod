@@ -6,7 +6,6 @@ const utils = require('./utils');
 const path = require('path');
 
 const main = function(options) {
-  console.log('Gathering Manifest data...');
   const settings = {basedir: options.output, uri: options.input};
 
   return WalkMainPlaylist(settings)
@@ -47,21 +46,19 @@ const main = function(options) {
           {
             input: pl.uri,
             output: settings.basedir,  // undef
-            baseuri: path.dirname(manifest.uri),
+            baseuri: path.dirname(manifest.full_uri),
             seconds: options.seconds    // OK
           });
       });
 
-      Promise.allSettled(subs).then(function() {
+      Promise.all(subs).then(function() {
         console.log('ALL subs then');
         resolve();
       }).catch(function(err) {
-        onError(err, manifest.uri, resources, resolve, reject);
+        onError(err, manifest.full_uri, resources, resolve, reject);
       });
 
     });
 };
 
 module.exports = main;
-// module.exports.WalkSubPlaylist = WalkSubPlaylist;
-// module.exports.WalkMainPlaylist = WalkMainPlaylist;

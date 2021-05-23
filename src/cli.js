@@ -5,18 +5,13 @@ const start = require('./index');
 //const start = require('./walk-sub-playlist');
 
 const args = yargs
- .usage("Usage: -u <url> [-bu <baseuri>]-o <output> -s <seconds>")
- .option("u", { alias: "url", describe: "URL of HLS manifest", type: "string", demandOption: true })
- .option("b", { alias: "baseuri", describe: "Base URL of HLS manifest", type: "string", demandOption: false })
+ .usage("Usage: -u <url> -o <output> -s <seconds>")
+ .option("u", { alias: "url", describe: "URL of HLS main manifest", type: "string", demandOption: true })
  .option("o", { alias: "output", describe: "output location (Default ./)", default: "./", type: "string", demandOption: false })
- .option("s", { alias: "seconds", describe: "Seconds of live HLS to download URL (Default: 300)", default: 300, type: "integer", demandOption: false })
+ .option("s", { alias: "seconds", describe: "Seconds of live HLS to download URL (Default: 120)", default: 120, type: "integer", demandOption: false })
  .argv;
 
-
-console.log(args);
-
-const cmd = `hls-live2vod -u ${args.url} -b ${args.baseuri} -o ${args.output} -s ${args.seconds}`;
-console.log(cmd);
+console.log(`hls-live2vod -u ${args.url} -o ${args.output} -s ${args.seconds}`);
 
 // Make output path
 const output = path.resolve(args.output);
@@ -29,7 +24,7 @@ const options = {
 };
 
 start(options).then(function() {
-  console.log('start.then');
+  console.log('TODO: should not get here until everything processed!!');
   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 
   console.log('Operation completed successfully in', timeTaken, 'seconds.');

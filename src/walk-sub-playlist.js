@@ -42,16 +42,10 @@ const doNextPromise = (count, manifest, settings) => {
 
   sleepThenWalkPlaylist(ms, settings, manifest)
     .then(x => {
-      let seconds_needed = settings.seconds;
-      let seconds_downloaded = manifest.duration;
-      let uri = manifest.uri;
-
-console.log(manifest);
-
-      console.log(`Process playlist: [${uri}] seconds:${seconds_downloaded}/${seconds_needed}`);
+      console.log(`Process playlist: [${manifest.uri}] seconds: ${manifest.duration.toFixed(1)}/${settings.seconds.toFixed(1)}`);
       count++;
 
-      if (seconds_downloaded < seconds_needed)
+      if (manifest.duration < settings.seconds)
         doNextPromise(count, manifest, settings)
     })
 }
@@ -70,11 +64,6 @@ const sleepThenWalkPlaylist = (ms, settings, manifest) => {
     }, ms);
   });
 }
-
-
-
-
-
 
 
 
@@ -105,27 +94,30 @@ const walkSubPlaylist = function(options, manifest) {
 
 
     if (uri) {
-      manifest.uri = utils.joinURI(baseuri, uri);
-      //console.log('manifest.uri:'+manifest.uri);
-
+      manifest.uri = uri;
+      manifest.full_uri = utils.joinURI(baseuri, uri);
       manifest.file = path.join(basedir, uri);
-      //console.log('manifest.file:'+manifest.file);
     }
 
+    //console.log('manifest.uri:'+manifest.uri);
+    //console.log('manifest.full_uri:'+manifest.full_uri);
+    //console.log('manifest.file:'+manifest.file);
+
+
     let requestPromise = request({
-      url: manifest.uri,
+      url: manifest.full_uri,
       timeout: requestTimeout,
       maxAttempts: requestRetryMaxAttempts,
       retryDelay: requestRetryDelay
     });
 
     requestPromise.then(function(response) {
-      console.log('resp:'+response.statusCode);
+//      console.log('resp:'+response.statusCode);
       if (response.statusCode !== 200) {
-        const manifestError = new Error(response.statusCode + '|' + manifest.uri);
+        const manifestError = new Error(response.statusCode + '|' + manifest.full_uri);
 
         manifestError.reponse = {body: response.body, headers: response.headers};
-        return onError(manifestError, manifest.uri, resources, resolve, reject);
+        return onError(manifestError, manifest.full_uri, resources, resolve, reject);
       }
       // Only push manifest uris that get a non 200 and don't timeout
 
@@ -137,18 +129,12 @@ const walkSubPlaylist = function(options, manifest) {
 
       manifest.content = response.body;
       manifest.parsed = utils.parseM3u8Manifest(manifest.content);
- //console.log(manifest.content);
-
-// console.log('parsed');
-// console.log(manifest.parsed);
-
       manifest.parsed.segments = manifest.parsed.segments || [];
 
       manageVODManifest(manifest);
 
-
+      // TODO: needed?
       const initSegments = [];
-
       manifest.parsed.segments.forEach(function(s) {
         if (s.map && s.map.uri && !initSegments.some((m) => s.map.uri === m.uri)) {
           manifest.parsed.segments.push(s.map);
@@ -171,9 +157,10 @@ const walkSubPlaylist = function(options, manifest) {
 
         manifest.visited[s.uri] = manifest;
 
-        s.fullUri = s.uri;
-        if (!utils.isAbsolute(s.fullUri)) {
-          s.fullUri = utils.joinURI(path.dirname(manifest.uri), s.fullUri);
+// TODO: reanem to full_uri
+        s.full_uri = s.uri;
+        if (!utils.isAbsolute(s.full_uri)) {
+          s.full_uri = utils.joinURI(path.dirname(manifest.full_uri), s.full_uri);
         }
 
         if (typeof s.duration !== 'undefined')
@@ -190,7 +177,7 @@ const walkSubPlaylist = function(options, manifest) {
       resolve(resources);
     })
       .catch(function(err) {
-        onError(err, manifest.uri, resources, resolve, reject);
+        onError(err, manifest.full_uri, resources, resolve, reject);
       });
   })
   .catch(function(error) {

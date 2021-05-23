@@ -31,13 +31,15 @@ const walkMainPlaylist = function(options) {
 
     if (uri) {
       manifest.uri = uri;
+      manifest.full_uri = uri;
       if (!parent)
         manifest.file = path.join(basedir, utils.urlBasename(uri));
       else
       manifest.file = path.join(basedir, uri);
 
-      console.log('XXX walkMainPlaylist 2 file:'+manifest.file);
-      console.log('XXX walkMainPlaylist 2  uri:'+manifest.uri);
+      // console.log('XXX walkMainPlaylist 2 file:'+manifest.file);
+      // console.log('XXX walkMainPlaylist 2  uri:'+manifest.uri);
+      // console.log('XXX walkMainPlaylist 2  full_uri:'+manifest.full_uri);
     }
 
     let existingManifest;
@@ -60,7 +62,7 @@ const walkMainPlaylist = function(options) {
     });
 
     requestPromise.then(function(response) {
-      console.log('> requestPromise.then resp:'+response.statusCode);
+//      console.log('> requestPromise.then resp:'+response.statusCode);
       if (response.statusCode !== 200) {
         const manifestError = new Error(response.statusCode + '|' + manifest.uri);
 
@@ -69,23 +71,21 @@ const walkMainPlaylist = function(options) {
       }
       // Only push manifest uris that get a non 200 and don't timeout
 
-      console.log('-------');
-      console.log(manifest.uri);
+      console.log(`Main playlist: ${manifest.uri}`);
       console.log(response.body);
 
 
-      resources.push(manifest);
-
       manifest.content = response.body;
 
-
       manifest.parsed = utils.parseM3u8Manifest(manifest.content);
-
       manifest.parsed.segments = manifest.parsed.segments || [];
       manifest.parsed.playlists = manifest.parsed.playlists || [];
       manifest.parsed.mediaGroups = manifest.parsed.mediaGroups || {};
 
-        return resolve(manifest);
+      resources.push(manifest);
+
+
+      return resolve(manifest);
     })
       .catch(function(err) {
         onError(err, manifest.uri, resources, resolve, reject);

@@ -50,13 +50,13 @@ const WriteData = function(resources, concurrency) {
       operations.push(function() {
         return writeFile(r.file, r.content);
       });
-    } else if (r.fullUri && inProgress.indexOf(r.fullUri) === -1) {
+    } else if (r.full_uri && inProgress.indexOf(r.full_uri) === -1) {
       operations.push(function() {
-        return requestFile(r.fullUri).then(function(content) {
+        return requestFile(r.full_uri).then(function(content) {
           return writeFile(r.file, content);
         });
       });
-      inProgress.push(r.fullUri);
+      inProgress.push(r.full_uri);
     }
   });
 

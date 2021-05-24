@@ -2,22 +2,20 @@
 const path = require('path');
 const yargs = require("yargs");
 const start = require('./index');
-//const start = require('./walk-sub-playlist');
 
 const args = yargs
- .usage("Usage: -u <url> -o <output> -s <seconds>")
- .option("u", { alias: "url", describe: "URL of HLS main manifest", type: "string", demandOption: true })
- .option("o", { alias: "output", describe: "output location (Default ./)", default: "./", type: "string", demandOption: false })
- .option("s", { alias: "seconds", describe: "Seconds of live HLS to download URL (Default: 120)", default: 120, type: "integer", demandOption: false })
+ .usage("Usage: -o <output> -s <seconds>  <url> ")
+ .demandCommand(1)
+ .option("o", { alias: "output", describe: "output location", default: "./", type: "string", demandOption: false })
+ .option("s", { alias: "seconds", describe: "Seconds of live HLS to download URL", default: 120, type: "integer", demandOption: false })
  .argv;
 
-console.log(`hls-live2vod -u ${args.url} -o ${args.output} -s ${args.seconds}`);
 
 // Make output path
 const output = path.resolve(args.output);
 const startTime = Date.now();
 const options = {
-  input: args.url,
+  input: args._[0],
   baseuri: args.baseuri,
   output,
   seconds: args.seconds

@@ -2,7 +2,7 @@
 const path = require('path');
 const yargs = require("yargs");
 
-const hlsLiveToVOD = require('./hls-live2vod');
+const walkMainPlaylist = require('./walk-main-playlist');
 
 const args = yargs
  .usage("Usage: hls-live2vod [-o <output>] [-s <seconds>] [-v]  <url> ")
@@ -28,13 +28,13 @@ const options = {
   requestRetryDelay: 1000
 };
 
-hlsLiveToVOD(options).then(function() {
-  console.log('TODO: should not get here until everything processed!!');
+walkMainPlaylist(options).then(function() {
   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
-
   console.log('Operation completed successfully in', timeTaken, 'seconds.');
-//  process.exit(0);  // TODO: was causing this to not run downlaoding.  somehow finish sub playlists before resolv ing main
+
+  process.exit(0);
 }).catch(function(error) {
   console.error('ERROR', error);
+
   process.exit(1);
 });

@@ -10,20 +10,19 @@ const writeData = require('./write-data');
 
 
 // Starts first promise, which will chain several others
-const main = function(options) {
+const walkSubPlaylist = function(options) {
 
   let manifest = {
     duration: 0,
     visited: []
   };
 
-  return new Promise(() => {
-    doNextPromise(0, manifest, options);
+  return new Promise((resolve) => {
+    doNextPromise(resolve, 0, manifest, options);
   })
 };
 
-const doNextPromise = (count, manifest, options) => {
-
+const doNextPromise = (resolve, count, manifest, options) => {
   let ms = 3000;
   if (count == 0) ms = 0;
   if (manifest && manifest.parsed && manifest.parsed.targetDuration)
@@ -37,20 +36,21 @@ const doNextPromise = (count, manifest, options) => {
       count++;
 
       if (manifest.duration < options.seconds)
-        doNextPromise(count, manifest, options)
+        doNextPromise(resolve, count, manifest, options)
+      else {
+        resolve();
+      }
     })
 }
 
 
 const sleepThenWalkPlaylist = (ms, options, manifest) => {
-//  console.log(`Wait: ${ms} ms`);
   return new Promise((resolve) => {
     setTimeout(() => {
-      walkSubPlaylist(options, manifest)
+      internalWalkSubPlaylist(options, manifest)
           .then(function(resources) {
             return writeData(resources, options);
           });
-
       resolve();
     }, ms);
   });
@@ -58,16 +58,13 @@ const sleepThenWalkPlaylist = (ms, options, manifest) => {
 
 
 
-const walkSubPlaylist = function(options, manifest) {
+const internalWalkSubPlaylist = function(options, manifest) {
   return new Promise(function(resolve, reject) {
     const {
       basedir,
       baseuri,
       uri,
     } = options;
-
-    // console.log('walkSubManifest baseuri:'+baseuri);
-    // console.log('walkSubManifest uri:'+uri);
 
     let resources = [];
 
@@ -155,9 +152,10 @@ const walkSubPlaylist = function(options, manifest) {
     .catch(function(err) {
       utils.onError(err, manifest.full_uri, reject);
     });
+
   })
   .catch(function(error) {
-    console.log(error);
+    utils.onError(error, manifest.full_uri, reject);
   })
 };
 
@@ -203,4 +201,4 @@ const updateVODPlaylist = function(manifest) {
 };
 
 
-module.exports = main;
+module.exports = walkSubPlaylist;

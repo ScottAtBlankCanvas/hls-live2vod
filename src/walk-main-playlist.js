@@ -3,30 +3,25 @@ const request = require('requestretry');
 const path = require('path');
 const utils = require('./utils');
 const hls_utils = require('./hls-utils');
+const writeData = require('./write-data');
+const walkSubPlaylist = require('./walk-sub-playlist');
 
 const walkMainPlaylist = function(options) {
   return new Promise(function(resolve, reject) {
     const {
       basedir,
-      uri,
-      parent = false
+      uri
     } = options;
 
     let resources = [];
-    const manifest = {parent};
-    manifest.duration = 0;
+    const manifest = {
+      duration: 0
+    };
 
     if (uri) {
       manifest.uri = uri;
       manifest.full_uri = uri;
-      if (!parent)
-        manifest.file = path.join(basedir, utils.urlBasename(uri));
-      else
-      manifest.file = path.join(basedir, uri);
-
-      // console.log('XXX walkMainPlaylist 2 file:'+manifest.file);
-      // console.log('XXX walkMainPlaylist 2  uri:'+manifest.uri);
-      // console.log('XXX walkMainPlaylist 2  full_uri:'+manifest.full_uri);
+      manifest.file = path.join(basedir, utils.urlBasename(uri));
     }
 
     let requestPromise = request({
@@ -58,7 +53,28 @@ const walkMainPlaylist = function(options) {
 
       resources.push(manifest);
 
-      return resolve(manifest);
+      writeData([manifest], options);
+
+      const playlists = manifest.parsed.playlists.concat(hls_utils.mediaGroupPlaylists(manifest.parsed.mediaGroups));
+
+      const subs = playlists.map(function(playlist) {
+        return walkSubPlaylist(
+          {
+            uri:      playlist.uri,
+            basedir:  options.basedir,
+            baseuri:  path.dirname(manifest.full_uri),
+            seconds:  options.seconds,
+            verbose:  options.verbose,
+            concurrency: options.concurrency
+          });
+      });
+
+
+      Promise.all(subs).then(function() {
+        resolve();
+      }).catch(function(err) {
+        utils.onError(err, manifest.full_uri, null);
+      });
     })
     .catch(function(err) {
       utils.onError(err, manifest.uri, reject);

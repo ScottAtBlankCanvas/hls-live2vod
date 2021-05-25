@@ -10,11 +10,9 @@ const main = function(options) {
 
   return WalkMainPlaylist(settings)
     .then(function(manifest) {
-      // console.log('> WalkMainPlaylist.then');
-      // console.log('manifest:');
-      // console.log(manifest);
-      // console.log('settings:');
-      // console.log(settings);
+
+      // write the master playlist
+      WriteData([manifest], 2);  // TODO: get rid of magic number
 
       const {
         basedir,

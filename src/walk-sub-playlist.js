@@ -157,7 +157,6 @@ const walkSubPlaylist = function(options, manifest) {
 
         manifest.visited[s.uri] = manifest;
 
-// TODO: reanem to full_uri
         s.full_uri = s.uri;
         if (!utils.isAbsolute(s.full_uri)) {
           s.full_uri = utils.joinURI(path.dirname(manifest.full_uri), s.full_uri);

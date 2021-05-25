@@ -69,6 +69,7 @@ const hlsGenerator = function(input) {
   delete manifest.allowCache;
   delete manifest.discontinuityStarts;
   delete manifest.discontinuitySequence;
+  delete manifest.playlistType;
 
   if (Object.keys(manifest).length > 0) {
     console.log('Unhandled in hls-generator:');

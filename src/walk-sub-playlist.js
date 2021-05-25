@@ -8,8 +8,6 @@ const hls_generator = require('./hls-generator');
 
 const writeData = require('./write-data');
 
-const startTime = Date.now();
-
 
 // Starts first promise, which will chain several others
 const main = function(options) {
@@ -19,46 +17,38 @@ const main = function(options) {
     visited: []
   };
 
-  let settings = {
-    basedir: options.output,
-    uri: options.input,
-    baseuri: options.baseuri,
-    seconds: options.seconds
-  };
-
-  // console.log('settings:');
-  // console.log(settings);
-
   return new Promise((resolve, reject) => {
-    doNextPromise(0, manifest, settings);
+    doNextPromise(0, manifest, options);
   })
 };
 
-const doNextPromise = (count, manifest, settings) => {
-//  console.log('doNextPromise:'+count);
+const doNextPromise = (count, manifest, options) => {
+
   let ms = 3000;
   if (count == 0) ms = 0;
   if (manifest && manifest.parsed && manifest.parsed.targetDuration)
     ms = 1000 * manifest.parsed.targetDuration;
 
-  sleepThenWalkPlaylist(ms, settings, manifest)
+  sleepThenWalkPlaylist(ms, options, manifest)
     .then(x => {
-      console.log(`Process playlist: [${manifest.uri}] seconds: ${manifest.duration.toFixed(1)}/${settings.seconds.toFixed(1)}`);
+      if (options.verbose)
+        console.log(`Process playlist: [${manifest.uri}] seconds: ${manifest.duration.toFixed(1)}/${options.seconds.toFixed(1)}`);
+
       count++;
 
-      if (manifest.duration < settings.seconds)
-        doNextPromise(count, manifest, settings)
+      if (manifest.duration < options.seconds)
+        doNextPromise(count, manifest, options)
     })
 }
 
 
-const sleepThenWalkPlaylist = (ms, settings, manifest) => {
+const sleepThenWalkPlaylist = (ms, options, manifest) => {
 //  console.log(`Wait: ${ms} ms`);
   return new Promise((resolve) => {
     setTimeout(() => {
-      walkSubPlaylist(settings, manifest)
+      walkSubPlaylist(options, manifest)
           .then(function(resources) {
-            return writeData(resources, 2);  // TODO: get rid of magic number
+            return writeData(resources, options);
           });
 
       resolve(ms);

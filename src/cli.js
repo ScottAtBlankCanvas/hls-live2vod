@@ -5,21 +5,24 @@ const yargs = require("yargs");
 const hlsLiveToVOD = require('./index');
 
 const args = yargs
- .usage("Usage: -o <output> -s <seconds>  <url> ")
+ .usage("Usage: hls-live2vod [-o <output>] [-s <seconds>] [-v]  <url> ")
  .demandCommand(1)
  .option("o", { alias: "output", describe: "output location", default: "./", type: "string", demandOption: false })
  .option("s", { alias: "seconds", describe: "Seconds of live HLS to download URL", default: 120, type: "integer", demandOption: false })
+ .option("v", { alias: "verbose", describe: "Verbose output", default: false, type: "boolean", demandOption: false })
  .argv;
 
 
 // Make output path
-const output = path.resolve(args.output);
+const basedir = path.resolve(args.output);
 const startTime = Date.now();
 const options = {
-  input: args._[0],
+  uri: args._[0],
   baseuri: args.baseuri,
-  output,
-  seconds: args.seconds
+  basedir: basedir,
+  seconds: args.seconds,
+  verbose: args.verbose,
+  concurrency: 3
 };
 
 hlsLiveToVOD(options).then(function() {

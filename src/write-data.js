@@ -5,11 +5,12 @@ const request = require('requestretry');
 const fs = Promise.promisifyAll(require('fs'));
 const path = require('path');
 
-const writeFile = function(file, content) {
+const writeFile = function(file, content, options) {
   return mkdirp(path.dirname(file)).then(function() {
     return fs.writeFileAsync(file, content);
   }).then(function() {
-    console.log('Downloaded: ' + path.relative('.', file));
+    if (options.verbose)
+      console.log('Downloaded: ' + path.relative('.', file));
   });
 };
 
@@ -39,24 +40,26 @@ const toUint8Array = function(nodeBuffer) {
 };
 
 
-const WriteData = function(resources, concurrency) {
+const WriteData = function(resources, options) {
   const inProgress = [];
   const operations = [];
 
   resources.forEach(function(r) {
     if (r.content) {
       operations.push(function() {
-        return writeFile(r.file, r.content);
+        return writeFile(r.file, r.content, options);
       });
     } else if (r.full_uri && inProgress.indexOf(r.full_uri) === -1) {
       operations.push(function() {
         return requestFile(r.full_uri).then(function(content) {
-          return writeFile(r.file, content);
+          return writeFile(r.file, content, options);
         });
       });
       inProgress.push(r.full_uri);
     }
   });
+
+  const concurrency = options.concurrency;
 
   return Promise.map(operations, function(o) {
     return Promise.join(o());

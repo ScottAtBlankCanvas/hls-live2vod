@@ -7,24 +7,19 @@ const hls_utils = require('./hls-utils');
 const path = require('path');
 
 // TODO: rename this file hls-2-vod.js
-// TODO: pass in concurrency and other options
-// TODO: pass in verbosity
 const hlsLiveToVOD = function(options) {
 
-  const settings = {
-    basedir: options.output,
-    uri: options.input
-  };
-
-  return walkMainPlaylist(settings)
+  return walkMainPlaylist(options)
     .then(function(manifest) {
 
       // write the master playlist
-      writeData([manifest], 2);  // TODO: get rid of magic number
+      writeData([manifest], options);  // TODO: get rid of magic number
 
       const {
         basedir,
         uri,
+        verbose = false,
+        concurrency = 3,
         parent = false,
         manifestIndex = 0,
         onError = function(err, errUri, resources, res, rej) {
@@ -51,10 +46,12 @@ const hlsLiveToVOD = function(options) {
         }
         return walkSubPlaylist(
           {
-            input: pl.uri,
-            output: settings.basedir,  // undef
+            uri: pl.uri,
+            basedir: options.basedir,
             baseuri: path.dirname(manifest.full_uri),
-            seconds: options.seconds    // OK
+            seconds: options.seconds,
+            verbose: options.verbose,
+            concurrency: options.concurrency
           });
       });
 

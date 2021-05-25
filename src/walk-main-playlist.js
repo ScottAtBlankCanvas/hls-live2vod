@@ -10,15 +10,6 @@ const walkMainPlaylist = function(options) {
       basedir,
       uri,
       parent = false,
-      onError = function(err, errUri, resources, res, rej) {
-        // Avoid adding the top level uri to nested errors
-        if (err.message.includes('|')) {
-          rej(err);
-        } else {
-          rej(new Error(err.message + '|' + errUri));
-        }
-      },
-//      visitedUrls = [],
       requestTimeout = 1500,
       requestRetryMaxAttempts = 5,
       requestRetryDelay = 5000
@@ -41,19 +32,7 @@ const walkMainPlaylist = function(options) {
       // console.log('XXX walkMainPlaylist 2  full_uri:'+manifest.full_uri);
     }
 
-    let existingManifest;
-
-//    visitedUrls[manifest.uri] = manifest;
-
-    let requestPromise;
-
-    // console.log('manifest.uri:'+manifest.uri);
-    // console.log('requestTimeout:'+requestTimeout);
-    // console.log('requestRetryMaxAttempts:'+requestRetryMaxAttempts);
-    // console.log('requestRetryDelay:'+requestRetryDelay);
-
-
-    requestPromise = request({
+    let requestPromise = request({
       url: manifest.uri,
       timeout: requestTimeout,
       maxAttempts: requestRetryMaxAttempts,
@@ -66,7 +45,7 @@ const walkMainPlaylist = function(options) {
         const manifestError = new Error(response.statusCode + '|' + manifest.uri);
 
         manifestError.reponse = {body: response.body, headers: response.headers};
-        return onError(manifestError, manifest.uri, resources, resolve, reject);
+        return utils.onError(manifestError, manifest.uri, resources, resolve, reject);
       }
       // Only push manifest uris that get a non 200 and don't timeout
 
@@ -84,9 +63,9 @@ const walkMainPlaylist = function(options) {
 
       return resolve(manifest);
     })
-      .catch(function(err) {
-        onError(err, manifest.uri, resources, resolve, reject);
-      });
+    .catch(function(err) {
+      utils.onError(err, manifest.uri, resources, resolve, reject);
+    });
   });
 };
 

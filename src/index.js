@@ -15,17 +15,6 @@ const hlsLiveToVOD = function(options) {
       // write the master playlist
       writeData([manifest], options);
 
-// TODO: consolidate onError methods
-      const onError = function(err, errUri, resources, res, rej) {
-        // Avoid adding the top level uri to nested errors
-        if (err.message.includes('|')) {
-          rej(err);
-        } else {
-          rej(new Error(err.message + '|' + errUri));
-        }
-      };
-
-
       const playlists = manifest.parsed.playlists.concat(hls_utils.mediaGroupPlaylists(manifest.parsed.mediaGroups));
 
       const subs = playlists.map(function(pl, z) {
@@ -48,7 +37,7 @@ const hlsLiveToVOD = function(options) {
         console.log('ALL subs then');
         resolve();
       }).catch(function(err) {
-        onError(err, manifest.full_uri, resources, resolve, reject);
+        utils.onError(err, manifest.full_uri, resources, resolve, reject);
       });
 
     });

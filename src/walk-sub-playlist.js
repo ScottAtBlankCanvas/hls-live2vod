@@ -64,14 +64,6 @@ const walkSubPlaylist = function(options, manifest) {
       basedir,
       baseuri,
       uri,
-      onError = function(err, errUri, resources, res, rej) {
-        // Avoid adding the top level uri to nested errors
-        if (err.message.includes('|')) {
-          rej(err);
-        } else {
-          rej(new Error(err.message + '|' + errUri));
-        }
-      },
       requestTimeout = 1500,  // TODO: move these to options?
       requestRetryMaxAttempts = 5,
       requestRetryDelay = 5000
@@ -107,7 +99,7 @@ const walkSubPlaylist = function(options, manifest) {
         const manifestError = new Error(response.statusCode + '|' + manifest.full_uri);
 
         manifestError.reponse = {body: response.body, headers: response.headers};
-        return onError(manifestError, manifest.full_uri, resources, resolve, reject);
+        return utils.onError(manifestError, manifest.full_uri, resources, resolve, reject);
       }
       // Only push manifest uris that get a non 200 and don't timeout
 
@@ -123,14 +115,14 @@ const walkSubPlaylist = function(options, manifest) {
 
       manageVODManifest(manifest);
 
-      // TODO: needed?
-      const initSegments = [];
-      manifest.parsed.segments.forEach(function(s) {
-        if (s.map && s.map.uri && !initSegments.some((m) => s.map.uri === m.uri)) {
-          manifest.parsed.segments.push(s.map);
-          initSegments.push(s.map);
-        }
-      });
+      // // TODO: needed?
+      // const initSegments = [];
+      // manifest.parsed.segments.forEach(function(s) {
+      //   if (s.map && s.map.uri && !initSegments.some((m) => s.map.uri === m.uri)) {
+      //     manifest.parsed.segments.push(s.map);
+      //     initSegments.push(s.map);
+      //   }
+      // });
 
       // SEGMENTS
       manifest.parsed.segments.forEach(function(s, i) {
@@ -139,7 +131,6 @@ const walkSubPlaylist = function(options, manifest) {
         }
         // If already processed, skip it
         if (manifest.visited[s.uri]) {
-//            console.log('Already downloaded uri:'+s.uri);
           return;
         }
 
@@ -165,7 +156,7 @@ const walkSubPlaylist = function(options, manifest) {
       resolve(resources);
     }) // request promise
     .catch(function(err) {
-      onError(err, manifest.full_uri, resources, resolve, reject);
+      utils.onError(err, manifest.full_uri, resources, resolve, reject);
     });
   })
   .catch(function(error) {

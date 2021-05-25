@@ -47,11 +47,20 @@ const isAbsolute = function(uri) {
   return false;
 };
 
+const onError = function(err, errUri, resources, res, rej) {
+  // Avoid adding the top level uri to nested errors
+  if (err.message.includes('|')) {
+    rej(err);
+  } else {
+    rej(new Error(err.message + '|' + errUri));
+  }
+};
 
 
 module.exports = {
   fsSanitize,
   urlBasename,
   joinURI,
-  isAbsolute
+  isAbsolute,
+  onError
 };

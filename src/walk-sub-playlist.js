@@ -72,7 +72,7 @@ const walkSubPlaylist = function(options, manifest) {
           rej(new Error(err.message + '|' + errUri));
         }
       },
-      requestTimeout = 1500,
+      requestTimeout = 1500,  // TODO: move these to options?
       requestRetryMaxAttempts = 5,
       requestRetryDelay = 5000
     } = options;

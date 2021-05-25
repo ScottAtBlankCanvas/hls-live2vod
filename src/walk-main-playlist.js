@@ -10,7 +10,6 @@ const walkMainPlaylist = function(options) {
       basedir,
       uri,
       parent = false,
-      manifestIndex = 0,
       onError = function(err, errUri, resources, res, rej) {
         // Avoid adding the top level uri to nested errors
         if (err.message.includes('|')) {
@@ -19,7 +18,7 @@ const walkMainPlaylist = function(options) {
           rej(new Error(err.message + '|' + errUri));
         }
       },
-      visitedUrls = [],
+//      visitedUrls = [],
       requestTimeout = 1500,
       requestRetryMaxAttempts = 5,
       requestRetryDelay = 5000
@@ -44,7 +43,7 @@ const walkMainPlaylist = function(options) {
 
     let existingManifest;
 
-    visitedUrls[manifest.uri] = manifest;
+//    visitedUrls[manifest.uri] = manifest;
 
     let requestPromise;
 

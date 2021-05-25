@@ -4,7 +4,7 @@ const path = require('path');
 
 const utils = require('./utils');
 const hls_utils = require('./hls-utils');
-const hls_generator = require('./hls-generator');
+const hls_generator = require('./hls-playlist-generator');
 
 const writeData = require('./write-data');
 
@@ -108,15 +108,6 @@ const internalWalkSubPlaylist = function(options, manifest) {
       manifest.parsed.segments = manifest.parsed.segments || [];
 
       updateVODPlaylist(manifest);
-
-      // // TODO: needed?
-      // const initSegments = [];
-      // manifest.parsed.segments.forEach(function(s) {
-      //   if (s.map && s.map.uri && !initSegments.some((m) => s.map.uri === m.uri)) {
-      //     manifest.parsed.segments.push(s.map);
-      //     initSegments.push(s.map);
-      //   }
-      // });
 
       // SEGMENTS
       manifest.parsed.segments.forEach(function(s) {

@@ -13,29 +13,17 @@ const hlsLiveToVOD = function(options) {
     .then(function(manifest) {
 
       // write the master playlist
-      writeData([manifest], options);  // TODO: get rid of magic number
+      writeData([manifest], options);
 
-      const {
-        basedir,
-        uri,
-        verbose = false,
-        concurrency = 3,
-        parent = false,
-        manifestIndex = 0,
-        onError = function(err, errUri, resources, res, rej) {
-          // Avoid adding the top level uri to nested errors
-          if (err.message.includes('|')) {
-            rej(err);
-          } else {
-            rej(new Error(err.message + '|' + errUri));
-          }
-        },
-        visitedUrls = [],
-        requestTimeout = 1500,
-        requestRetryMaxAttempts = 5,
-        requestRetryDelay = 5000
-      } = options;
-
+// TODO: consolidate onError methods
+      const onError = function(err, errUri, resources, res, rej) {
+        // Avoid adding the top level uri to nested errors
+        if (err.message.includes('|')) {
+          rej(err);
+        } else {
+          rej(new Error(err.message + '|' + errUri));
+        }
+      };
 
 
       const playlists = manifest.parsed.playlists.concat(hls_utils.mediaGroupPlaylists(manifest.parsed.mediaGroups));

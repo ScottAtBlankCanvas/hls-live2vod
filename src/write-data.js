@@ -44,8 +44,6 @@ const WriteData = function(resources, concurrency) {
   const operations = [];
 
   resources.forEach(function(r) {
-//    console.log(r.duration+":"+r.uri);
-
     if (r.content) {
       operations.push(function() {
         return writeFile(r.file, r.content);

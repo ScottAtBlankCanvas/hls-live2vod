@@ -1,15 +1,18 @@
 /* eslint-disable no-console */
 
 // Takes a model created by m3u8-parser and returns an HLS playlist
+// Also copies the structure and removes the members as they are processed/ignored.
+// This allows printing out unhandled members
 const hlsGenerator = function(input) {
   // We will make a copy so we can see what members have not been handled
-
   let manifest = JSON.parse(JSON.stringify(input));
 
-  //console.log(manifest);
   let s = '#EXTM3U\n';
 
+  //
   // Headers
+  //
+
   if (manifest.targetDuration)
     s += '#EXT-X-TARGETDURATION:' + manifest.targetDuration + '\n';
   if (manifest.version)
@@ -24,14 +27,19 @@ const hlsGenerator = function(input) {
   delete manifest.dateTimeString;
   delete manifest.dateTimeObject;
 
+
+  //
   // Body
-  // map items are in segments.  They are the ones that do not have a .map attribute
-    manifest.segments.forEach(function(seg) {
-      if (seg.map || !seg.uri) {
-        return;
-      }
-      s += '#EXT-X-MAP:URI="' + seg.uri + '"\n';
-    });
+  //
+
+  // map items are in segments in the model for some reason
+  // They are the ones that do not have a .map attribute
+  manifest.segments.forEach(function(seg) {
+    if (seg.map || !seg.uri) {
+      return;
+    }
+    s += '#EXT-X-MAP:URI="' + seg.uri + '"\n';
+  });
 
   // All the segments (making sure to skip the MAP members handled above)
   manifest.segments.forEach(function(seg) {
@@ -43,11 +51,19 @@ const hlsGenerator = function(input) {
   });
   delete manifest.segments;
 
+
+  //
   // Footers
+  //
+
   if (manifest.endList)
     s += '#EXT-X-ENDLIST' + '\n';
   delete manifest.endList;
 
+
+  //
+  // Report unhanlded
+  //
 
   // Not expected to handle.  Remove them so the warning is not triggered
   delete manifest.allowCache;
@@ -61,7 +77,6 @@ const hlsGenerator = function(input) {
 
   return s;
 };
-
 
 
 module.exports = hlsGenerator;

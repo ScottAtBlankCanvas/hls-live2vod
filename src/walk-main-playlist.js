@@ -2,7 +2,7 @@
 const request = require('requestretry');
 const path = require('path');
 const utils = require('./utils');
-
+const hls_utils = require('./hls-utils');
 
 const walkMainPlaylist = function(options) {
   return new Promise(function(resolve, reject) {
@@ -77,7 +77,7 @@ const walkMainPlaylist = function(options) {
 
       manifest.content = response.body;
 
-      manifest.parsed = utils.parseM3u8Manifest(manifest.content);
+      manifest.parsed = hls_utils.parseM3u8Manifest(manifest.content);
       manifest.parsed.segments = manifest.parsed.segments || [];
       manifest.parsed.playlists = manifest.parsed.playlists || [];
       manifest.parsed.mediaGroups = manifest.parsed.mediaGroups || {};

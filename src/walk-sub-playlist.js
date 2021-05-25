@@ -3,9 +3,10 @@ const request = require('requestretry');
 const path = require('path');
 
 const utils = require('./utils');
-const hlsGenerator = require('./hls-generator');
+const hls_utils = require('./hls-utils');
+const hls_generator = require('./hls-generator');
 
-const WriteData = require('./write-data');
+const writeData = require('./write-data');
 
 const startTime = Date.now();
 
@@ -57,7 +58,7 @@ const sleepThenWalkPlaylist = (ms, settings, manifest) => {
     setTimeout(() => {
       walkSubPlaylist(settings, manifest)
           .then(function(resources) {
-            return WriteData(resources, 2);  // TODO: get rid of magic number
+            return writeData(resources, 2);  // TODO: get rid of magic number
           });
 
       resolve(ms);
@@ -74,7 +75,6 @@ const walkSubPlaylist = function(options, manifest) {
       baseuri,
       uri,
       onError = function(err, errUri, resources, res, rej) {
-        console.log(err);
         // Avoid adding the top level uri to nested errors
         if (err.message.includes('|')) {
           rej(err);
@@ -128,7 +128,7 @@ const walkSubPlaylist = function(options, manifest) {
       resources.push(manifest);
 
       manifest.content = response.body;
-      manifest.parsed = utils.parseM3u8Manifest(manifest.content);
+      manifest.parsed = hls_utils.parseM3u8Manifest(manifest.content);
       manifest.parsed.segments = manifest.parsed.segments || [];
 
       manageVODManifest(manifest);
@@ -169,15 +169,14 @@ const walkSubPlaylist = function(options, manifest) {
       });
 
       if (manifest.content) {
-        manifest.content = hlsGenerator(manifest.vod);
+        manifest.content = hls_generator(manifest.vod);
       }
 
-
       resolve(resources);
-    })
-      .catch(function(err) {
-        onError(err, manifest.full_uri, resources, resolve, reject);
-      });
+    }) // request promise
+    .catch(function(err) {
+      onError(err, manifest.full_uri, resources, resolve, reject);
+    });
   })
   .catch(function(error) {
     console.log(error);

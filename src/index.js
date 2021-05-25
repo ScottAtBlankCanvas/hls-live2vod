@@ -1,18 +1,23 @@
 /* eslint-disable no-console */
-const WalkSubPlaylist = require('./walk-sub-playlist');
-const WalkMainPlaylist = require('./walk-main-playlist');
-const WriteData = require('./write-data');
+const walkSubPlaylist = require('./walk-sub-playlist');
+const walkMainPlaylist = require('./walk-main-playlist');
+const writeData = require('./write-data');
 const utils = require('./utils');
+const hls_utils = require('./hls-utils');
 const path = require('path');
 
-const main = function(options) {
-  const settings = {basedir: options.output, uri: options.input};
+const hlsLiveToVOD = function(options) {
 
-  return WalkMainPlaylist(settings)
+  const settings = {
+    basedir: options.output,
+    uri: options.input
+  };
+
+  return walkMainPlaylist(settings)
     .then(function(manifest) {
 
       // write the master playlist
-      WriteData([manifest], 2);  // TODO: get rid of magic number
+      writeData([manifest], 2);  // TODO: get rid of magic number
 
       const {
         basedir,
@@ -34,13 +39,14 @@ const main = function(options) {
       } = options;
 
 
-      const playlists = manifest.parsed.playlists.concat(utils.mediaGroupPlaylists(manifest.parsed.mediaGroups));
+
+      const playlists = manifest.parsed.playlists.concat(hls_utils.mediaGroupPlaylists(manifest.parsed.mediaGroups));
 
       const subs = playlists.map(function(pl, z) {
         if (!pl.uri) {
           return Promise.resolve();
         }
-        return WalkSubPlaylist(
+        return walkSubPlaylist(
           {
             input: pl.uri,
             output: settings.basedir,  // undef
@@ -59,4 +65,4 @@ const main = function(options) {
     });
 };
 
-module.exports = main;
+module.exports = hlsLiveToVOD;

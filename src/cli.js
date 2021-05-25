@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 const path = require('path');
 const yargs = require("yargs");
-const start = require('./index');
+
+const hlsLiveToVOD = require('./index');
 
 const args = yargs
  .usage("Usage: -o <output> -s <seconds>  <url> ")
@@ -21,7 +22,7 @@ const options = {
   seconds: args.seconds
 };
 
-start(options).then(function() {
+hlsLiveToVOD(options).then(function() {
   console.log('TODO: should not get here until everything processed!!');
   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 

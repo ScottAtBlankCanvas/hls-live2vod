@@ -113,7 +113,7 @@ const walkSubPlaylist = function(options, manifest) {
       manifest.parsed = hls_utils.parseM3u8Manifest(manifest.content);
       manifest.parsed.segments = manifest.parsed.segments || [];
 
-      manageVODManifest(manifest);
+      updateVODPlaylist(manifest);
 
       // // TODO: needed?
       // const initSegments = [];
@@ -164,11 +164,10 @@ const walkSubPlaylist = function(options, manifest) {
   })
 };
 
-const manageVODManifest = function(manifest) {
+const updateVODPlaylist = function(manifest) {
 
-  // Now add segments to the manifest VOD
+  // First time, use the live playlist as the starting point
   if (!manifest.vod) {
-    // first playlist, use this for the starting point for the VOD playlist
     manifest.vod = manifest.parsed;
 
     // Remove some items that do not apply to VOD we are creating...
@@ -207,5 +206,4 @@ const manageVODManifest = function(manifest) {
 };
 
 
-//module.exports = walkSubPlaylist;
 module.exports = main;

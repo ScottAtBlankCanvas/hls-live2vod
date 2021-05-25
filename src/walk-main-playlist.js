@@ -9,10 +9,7 @@ const walkMainPlaylist = function(options) {
     const {
       basedir,
       uri,
-      parent = false,
-      requestTimeout = 1500,
-      requestRetryMaxAttempts = 5,
-      requestRetryDelay = 5000
+      parent = false
     } = options;
 
     let resources = [];
@@ -34,9 +31,9 @@ const walkMainPlaylist = function(options) {
 
     let requestPromise = request({
       url: manifest.uri,
-      timeout: requestTimeout,
-      maxAttempts: requestRetryMaxAttempts,
-      retryDelay: requestRetryDelay
+      timeout: options.requestTimeout,
+      maxAttempts: options.requestRetryMaxAttempts,
+      retryDelay: options.requestRetryDelay
     });
 
     requestPromise.then(function(response) {

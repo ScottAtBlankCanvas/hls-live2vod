@@ -6,7 +6,6 @@ const utils = require('./utils');
 const hls_utils = require('./hls-utils');
 const path = require('path');
 
-// TODO: rename this file hls-2-vod.js
 const hlsLiveToVOD = function(options) {
 
   return walkMainPlaylist(options)

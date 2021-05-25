@@ -2,7 +2,7 @@
 const path = require('path');
 const yargs = require("yargs");
 
-const hlsLiveToVOD = require('./index');
+const hlsLiveToVOD = require('./hls-live2vod');
 
 const args = yargs
  .usage("Usage: hls-live2vod [-o <output>] [-s <seconds>] [-v]  <url> ")
@@ -22,7 +22,10 @@ const options = {
   basedir: basedir,
   seconds: args.seconds,
   verbose: args.verbose,
-  concurrency: 3
+  concurrency: 3,
+  requestTimeout: 1000,
+  requestRetryMaxAttempts: 3,
+  requestRetryDelay: 1000
 };
 
 hlsLiveToVOD(options).then(function() {

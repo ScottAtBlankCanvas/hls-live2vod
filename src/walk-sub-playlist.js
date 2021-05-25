@@ -64,9 +64,6 @@ const walkSubPlaylist = function(options, manifest) {
       basedir,
       baseuri,
       uri,
-      requestTimeout = 1500,  // TODO: move these to options?
-      requestRetryMaxAttempts = 5,
-      requestRetryDelay = 5000
     } = options;
 
     // console.log('walkSubManifest baseuri:'+baseuri);
@@ -88,9 +85,9 @@ const walkSubPlaylist = function(options, manifest) {
 
     let requestPromise = request({
       url: manifest.full_uri,
-      timeout: requestTimeout,
-      maxAttempts: requestRetryMaxAttempts,
-      retryDelay: requestRetryDelay
+      timeout: options.requestTimeout,
+      maxAttempts: options.requestRetryMaxAttempts,
+      retryDelay: options.requestRetryDelay
     });
 
     requestPromise.then(function(response) {

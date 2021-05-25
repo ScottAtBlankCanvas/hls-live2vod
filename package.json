@@ -7,6 +7,7 @@
     "hls-live2vod": "./src/cli.js"
   },
   "scripts": {
+    "lint": "eslint 'src/**/*.js?(x)'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -29,5 +30,8 @@
     "requestretry": "^5.0.0",
     "write-data": "^1.0.2",
     "yargs": "^17.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.27.0"
   }
 }

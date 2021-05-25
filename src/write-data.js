@@ -35,11 +35,6 @@ const requestFile = function(uri) {
   });
 };
 
-const toUint8Array = function(nodeBuffer) {
-  return new Uint8Array(nodeBuffer.buffer, nodeBuffer.byteOffset, nodeBuffer.byteLength / Uint8Array.BYTES_PER_ELEMENT);
-};
-
-
 const WriteData = function(resources, options) {
   const inProgress = [];
   const operations = [];
@@ -63,7 +58,7 @@ const WriteData = function(resources, options) {
 
   return Promise.map(operations, function(o) {
     return Promise.join(o());
-  }, {concurrency}).all(function(o) {
+  }, {concurrency}).all(function() {
     console.log('DONE!');
     return Promise.resolve();
   });

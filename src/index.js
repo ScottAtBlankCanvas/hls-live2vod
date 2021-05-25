@@ -17,17 +17,17 @@ const hlsLiveToVOD = function(options) {
 
       const playlists = manifest.parsed.playlists.concat(hls_utils.mediaGroupPlaylists(manifest.parsed.mediaGroups));
 
-      const subs = playlists.map(function(pl, z) {
-        if (!pl.uri) {
+      const subs = playlists.map(function(playlist) {
+        if (!playlist.uri) {
           return Promise.resolve();
         }
         return walkSubPlaylist(
           {
-            uri: pl.uri,
-            basedir: options.basedir,
-            baseuri: path.dirname(manifest.full_uri),
-            seconds: options.seconds,
-            verbose: options.verbose,
+            uri:      playlist.uri,
+            basedir:  options.basedir,
+            baseuri:  path.dirname(manifest.full_uri),
+            seconds:  options.seconds,
+            verbose:  options.verbose,
             concurrency: options.concurrency
           });
       });
@@ -35,9 +35,9 @@ const hlsLiveToVOD = function(options) {
       Promise.all(subs).then(function() {
         // TODO: never gets here???
         console.log('ALL subs then');
-        resolve();
+        //resolve();
       }).catch(function(err) {
-        utils.onError(err, manifest.full_uri, resources, resolve, reject);
+        utils.onError(err, manifest.full_uri, null);
       });
 
     });

@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-const m3u8 = require('m3u8-parser');
 const url = require('url');
 const path = require('path');
 const querystring = require('querystring');
@@ -47,12 +46,12 @@ const isAbsolute = function(uri) {
   return false;
 };
 
-const onError = function(err, errUri, resources, res, rej) {
+const onError = function(err, uri, rej) {
   // Avoid adding the top level uri to nested errors
   if (err.message.includes('|')) {
-    rej(err);
+    if (rej) rej(err);
   } else {
-    rej(new Error(err.message + '|' + errUri));
+    if (rej) rej(new Error(err.message + '|' + uri));
   }
 };
 

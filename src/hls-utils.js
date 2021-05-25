@@ -1,10 +1,5 @@
 /* eslint-disable no-console */
 const m3u8 = require('m3u8-parser');
-//const request = require('requestretry');
-const url = require('url');
-const path = require('path');
-const querystring = require('querystring');
-const filenamify = require('filenamify');
 
 const mediaGroupPlaylists = function(mediaGroups) {
   const playlists = [];

@@ -64,7 +64,7 @@ const walkMainPlaylist = function(options) {
       return resolve(manifest);
     })
     .catch(function(err) {
-      utils.onError(err, manifest.uri, resources, resolve, reject);
+      utils.onError(err, manifest.uri, reject);
     });
   });
 };

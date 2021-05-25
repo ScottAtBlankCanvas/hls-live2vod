@@ -17,7 +17,7 @@ const main = function(options) {
     visited: []
   };
 
-  return new Promise((resolve, reject) => {
+  return new Promise(() => {
     doNextPromise(0, manifest, options);
   })
 };
@@ -30,7 +30,7 @@ const doNextPromise = (count, manifest, options) => {
     ms = 1000 * manifest.parsed.targetDuration;
 
   sleepThenWalkPlaylist(ms, options, manifest)
-    .then(x => {
+    .then(function() {
       if (options.verbose)
         console.log(`Process playlist: [${manifest.uri}] seconds: ${manifest.duration.toFixed(1)}/${options.seconds.toFixed(1)}`);
 
@@ -51,7 +51,7 @@ const sleepThenWalkPlaylist = (ms, options, manifest) => {
             return writeData(resources, options);
           });
 
-      resolve(ms);
+      resolve();
     }, ms);
   });
 }
@@ -99,7 +99,7 @@ const walkSubPlaylist = function(options, manifest) {
         const manifestError = new Error(response.statusCode + '|' + manifest.full_uri);
 
         manifestError.reponse = {body: response.body, headers: response.headers};
-        return utils.onError(manifestError, manifest.full_uri, resources, resolve, reject);
+        return utils.onError(manifestError, manifest.full_uri, reject);
       }
       // Only push manifest uris that get a non 200 and don't timeout
 
@@ -125,7 +125,7 @@ const walkSubPlaylist = function(options, manifest) {
       // });
 
       // SEGMENTS
-      manifest.parsed.segments.forEach(function(s, i) {
+      manifest.parsed.segments.forEach(function(s) {
         if (!s.uri) {
           return;
         }
@@ -156,7 +156,7 @@ const walkSubPlaylist = function(options, manifest) {
       resolve(resources);
     }) // request promise
     .catch(function(err) {
-      utils.onError(err, manifest.full_uri, resources, resolve, reject);
+      utils.onError(err, manifest.full_uri, reject);
     });
   })
   .catch(function(error) {

@@ -6,6 +6,9 @@ const utils = require('./utils');
 const hls_utils = require('./hls-utils');
 const path = require('path');
 
+// TODO: rename this file hls-2-vod.js
+// TODO: pass in concurrency and other options
+// TODO: pass in verbosity
 const hlsLiveToVOD = function(options) {
 
   const settings = {
@@ -56,6 +59,7 @@ const hlsLiveToVOD = function(options) {
       });
 
       Promise.all(subs).then(function() {
+        // TODO: never gets here???
         console.log('ALL subs then');
         resolve();
       }).catch(function(err) {

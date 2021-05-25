@@ -71,9 +71,8 @@ const walkMainPlaylist = function(options) {
       }
       // Only push manifest uris that get a non 200 and don't timeout
 
-      console.log(`Main playlist: ${manifest.uri}`);
-      console.log(response.body);
-
+      // console.log(`Main playlist: ${manifest.uri}`);
+      // console.log(response.body);
 
       manifest.content = response.body;
 
@@ -83,7 +82,6 @@ const walkMainPlaylist = function(options) {
       manifest.parsed.mediaGroups = manifest.parsed.mediaGroups || {};
 
       resources.push(manifest);
-
 
       return resolve(manifest);
     })

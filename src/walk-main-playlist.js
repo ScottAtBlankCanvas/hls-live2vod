@@ -37,7 +37,7 @@ const walkMainPlaylist = function(options) {
         const manifestError = new Error(response.statusCode + '|' + manifest.uri);
 
         manifestError.reponse = {body: response.body, headers: response.headers};
-        return utils.onError(manifestError, manifest.uri, resources, resolve, reject);
+        return utils.onError(manifestError, manifest.uri, reject);
       }
       // Only push manifest uris that get a non 200 and don't timeout
 

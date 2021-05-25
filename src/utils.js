@@ -49,9 +49,16 @@ const isAbsolute = function(uri) {
 const onError = function(err, uri, rej) {
   // Avoid adding the top level uri to nested errors
   if (err.message.includes('|')) {
-    if (rej) rej(err);
+    if (rej)
+      rej(err)
+    else
+      console.log(err.message);
   } else {
-    if (rej) rej(new Error(err.message + '|' + uri));
+    let error = new Error(err.message + ' | ' + uri);
+    if (rej)
+      rej(error)
+    else
+      console.log(error.message);
   }
 };
 

@@ -146,7 +146,7 @@ const internalWalkSubPlaylist = function(options, manifest) {
 
   })
   .catch(function(error) {
-    utils.onError(error, manifest.full_uri, reject);
+    utils.onError(error, manifest.full_uri, null);
   })
 };
 

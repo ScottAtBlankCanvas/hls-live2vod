@@ -10,7 +10,7 @@ const writeFile = function(file, content, options) {
     return fs.writeFileAsync(file, content);
   }).then(function() {
     if (options.verbose)
-      console.log('Downloaded: ' + path.relative('.', file));
+      console.log('  Downloaded: ' + path.relative('.', file));
   });
 };
 
@@ -35,7 +35,7 @@ const requestFile = function(uri) {
   });
 };
 
-const WriteData = function(resources, options) {
+const writeData = function(resources, options) {
   const inProgress = [];
   const operations = [];
 
@@ -64,4 +64,4 @@ const WriteData = function(resources, options) {
   });
 };
 
-module.exports = WriteData;
+module.exports = writeData;

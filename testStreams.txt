@@ -1,0 +1,35 @@
+ Download and play as VOD:
+--------------------------
+
+Apple bipbop (VOD)
+hls-live2vod -o ./temp/bipbop -s 70 -v http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8\n
+
+Wowza live stream
+hls-live2vod -o ./temp/wse -s 100 http:\/\/localhost:1935/live/bbb/playlist.m3u8 |tee x\n
+
+Akamai VOD demo
+hls-live2vod -o ./temp/bitm1 -s 70 -v https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8
+
+Unified VOD sample:
+hls-live2vod -o ./temp/unif1 -s 70 -v http://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel.ism/.m3u8
+Note: the file "m3u8" needed to be renamed "main.m3u8" to be playable directly in Safari
+
+Akamai Live sample
+hls-live2vod -o ./temp/ak1 -s 70 -v https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
+
+Bitmovin VOD example:
+hls-live2vod -o ./temp/bitm2 -s 70 -v https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8
+
+Bitmovin VR VOD example:
+hls-live2vod -o ./temp/bitm_vr -s 70 -v https://bitmovin-a.akamaihd.net/content/playhouse-vr/m3u8s/105560.m3u8
+
+To Be Tested:
+-------------
+
+
+
+Bugs
+----
+LLHLS Stream:
+hls-live2vod -o ./temp/llhls -s 100 https://ll-hls-test-apple.akamaized.net/cmaf/master.m3u8
+Seems to have a problem with the MAP element.  Plays as screeching sounds`

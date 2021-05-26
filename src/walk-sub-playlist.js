@@ -180,7 +180,8 @@ const updateVODPlaylist = function(manifest) {
   else {
     // after first time, add new segments to the VOD playlist
     manifest.parsed.segments.forEach(function(s) {
-      if (!s.uri || !s.map || manifest.visited[s.uri]) {
+      // TODO: something is broken with LLHLS and MAPs
+      if (!s.uri /*|| !s.map*/ || manifest.visited[s.uri]) {
         return;
       }
 

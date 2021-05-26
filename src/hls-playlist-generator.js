@@ -32,18 +32,19 @@ const hlsGenerator = function(input) {
   // Body
   //
 
-  // map items are in segments in the model for some reason
-  // They are the ones that do not have a .map attribute
-  manifest.segments.forEach(function(seg) {
-    if (seg.map || !seg.uri) {
-      return;
-    }
-    s += '#EXT-X-MAP:URI="' + seg.uri + '"\n';
-  });
+  // TODO: something is broken with LLHLS and MAPs
+  // // map items are in segments in the model for some reason
+  // // They are the ones that do not have a .map attribute
+  // manifest.segments.forEach(function(seg) {
+  //   if (seg.map || !seg.uri) {
+  //     return;
+  //   }
+  //   s += '#EXT-X-MAP:URI="' + seg.uri + '"\n';
+  // });
 
   // All the segments (making sure to skip the MAP members handled above)
   manifest.segments.forEach(function(seg) {
-    if (!seg.map || !seg.uri) {
+    if (!seg.uri) {
       return;
     }
     s += '#EXTINF:' + seg.duration + '\n';

@@ -1,12 +1,8 @@
-# HLS-LIVE2VOD
+# hls-live2vod
 
 
-A simple CLI tool to fetch a specified number of seconds of a live HLS manifest and its segments and save it all locally as a VOD HLS
+A simple CLI tool to fetch a specified number of seconds of a live HLS manifest and its segments and save it all locally as a VOD HLS files
 
-
-
-- [Installation](#installation)
-  - [Command Line Usage](#command-line-usage)
 
 
 ## Installation

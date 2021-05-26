@@ -21,7 +21,7 @@ const walkMainPlaylist = function(options) {
     if (uri) {
       manifest.uri = uri;
       manifest.full_uri = uri;
-      manifest.file = path.join(basedir, utils.urlBasename(uri));
+      manifest.file = path.join(basedir, utils.urlPathname(uri));
     }
 
     let requestPromise = request({
@@ -61,7 +61,7 @@ const walkMainPlaylist = function(options) {
         return walkSubPlaylist(
           {
             uri:      playlist.uri,
-            basedir:  options.basedir,
+            basedir:  path.dirname(manifest.file),
             baseuri:  path.dirname(manifest.full_uri),
             seconds:  options.seconds,
             verbose:  options.verbose,

@@ -32,7 +32,7 @@ walkMainPlaylist(options).then(function() {
   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
   console.log('Operation completed successfully in', timeTaken, 'seconds.');
 
-  process.exit(0);
+//  process.exit(0);
 }).catch(function(error) {
   console.error('ERROR', error);
 

@@ -48,9 +48,7 @@ const sleepThenWalkPlaylist = (ms, options, manifest) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       internalWalkSubPlaylist(options, manifest)
-          .then(function(resources) {
-            return writeData(resources, options);
-          });
+          .then(function(resources) {});
       resolve();
     }, ms);
   });
@@ -111,6 +109,7 @@ const internalWalkSubPlaylist = function(options, manifest) {
 
       // SEGMENTS
       manifest.parsed.segments.forEach(function(s) {
+        consoole.log(s);
         if (!s.uri) {
           return;
         }
@@ -118,10 +117,9 @@ const internalWalkSubPlaylist = function(options, manifest) {
         if (manifest.visited[s.uri]) {
           return;
         }
-
-        s.file = path.join(path.dirname(manifest.file), utils.urlBasename(s.uri));
-
         manifest.visited[s.uri] = manifest;
+
+        s.file = path.join(path.dirname(manifest.file), s.uri);
 
         s.full_uri = s.uri;
         if (!utils.isAbsolute(s.full_uri)) {

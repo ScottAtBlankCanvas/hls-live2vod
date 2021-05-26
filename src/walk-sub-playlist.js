@@ -129,7 +129,7 @@ const internalWalkSubPlaylist = function(options, manifest) {
         if (!utils.isAbsolute(s.full_uri)) {
           s.full_uri = utils.joinURI(path.dirname(manifest.full_uri), s.full_uri);
         }
-        console.log(s.uri+' | '+s.full_uri+' | '+s.file);
+        //console.log(s.uri+' | '+s.full_uri+' | '+s.file);
 
         if (typeof s.duration !== 'undefined')
           manifest.duration += s.duration;

@@ -38,8 +38,9 @@ const joinURI = function(absolute, relative) {
 
   abs.query = rel.query;
   abs.hash = rel.hash;
+  abs.search = rel.search;
 
-  return url.format(abs);
+  return url.format(abs, {auth:true, fragment:true, search:true});
 };
 
 const isAbsolute = function(uri) {

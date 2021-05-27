@@ -1,14 +1,25 @@
 # hls-live2vod
 
+A CLI tool to fetch a specified number of seconds of a live HLS manifest and its segments and save it all locally as a VOD HLS files.
 
-A simple CLI tool to fetch a specified number of seconds of a live HLS manifest and its segments and save it all locally as a VOD HLS files
+This has been tested with a limited set of HLS live URLs that I needed to use.
 
+Has been tested with at least one HLS stream from:
+- Wowza
+- Mux
+- Bitmovin
+- Akamai
+
+There are also no unit tests.  I have great intentions of providing these but, you know, time.
 
 
 ## Installation
 
+- Download the code
+
 ``` bash
-  $ [sudo] npm install hls-fetcher -g
+  $ cd hls-live2vod
+  $ [sudo] npm install hls-live2vod -g
 ```
 
 ### Command Line Usage

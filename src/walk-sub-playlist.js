@@ -69,15 +69,29 @@ const internalWalkSubPlaylist = function(options, manifest) {
     let resources = [];
 
 
-    if (uri) {
       manifest.uri = uri;
-      manifest.full_uri = utils.joinURI(baseuri, uri);
-      manifest.file = path.join(basedir, uri);
+      // manifest.full_uri = utils.joinURI(baseuri, uri);
+      // manifest.file = path.join(basedir, uri);
+    if (utils.isAbsolute(manifest.uri)) {
+      manifest.full_uri = manifest.uri;
+      manifest.uri = utils.urlPathname(manifest.full_uri);
+      manifest.file = path.join(basedir, manifest.uri);
+          //   const parsed = url.parse(playlist.uri);
+      // opts.baseuri = parsed.protocol+"//"+parsed.hostname+"/";   // TODO: make util fcn
+    } else {
+      const rel_uri = manifest.uri;  // may have query params
+      manifest.full_uri = utils.joinURI(baseuri, rel_uri);  // may have query params
+      manifest.uri = utils.urlPathname(rel_uri);   // No query params
+      manifest.file = path.join(basedir, manifest.uri);
     }
 
-    //console.log('manifest.uri:'+manifest.uri);
-    //console.log('manifest.full_uri:'+manifest.full_uri);
-    //console.log('manifest.file:'+manifest.file);
+
+// console.log('opts:');
+// console.log(options);
+//     console.log('basedir:'+basedir);
+//     console.log('manifest.uri:'+manifest.uri);
+//     console.log('manifest.full_uri:'+manifest.full_uri);
+//     console.log('manifest.file:'+manifest.file);
 
 
     let requestPromise = request({
@@ -101,34 +115,45 @@ const internalWalkSubPlaylist = function(options, manifest) {
       // console.log(manifest.uri);
       // console.log(response.body);
 
-      resources.push(manifest);
 
       manifest.content = response.body;
       manifest.parsed = hls_utils.parseM3u8Manifest(manifest.content);
       manifest.parsed.segments = manifest.parsed.segments || [];
 
-      updateVODPlaylist(manifest);
-
-      // SEGMENTS
+      // Walk the segments and set .uri, .full_uri and file attribiutes based on whether
+      // original uri is absolute or not
       manifest.parsed.segments.forEach(function(s) {
-        // console.log('seg:');
-        // console.log(s);
-
         if (!s.uri) {
           return;
         }
+
+        if (utils.isAbsolute(s.uri)) {
+          s.full_uri = s.uri;
+          s.uri = utils.urlPathname(s.uri);
+          //   const parsed = url.parse(playlist.uri);
+          // opts.baseuri = parsed.protocol+"//"+parsed.hostname+"/";   // TODO: make util fcn
+        } else {
+          s.full_uri = utils.joinURI(path.dirname(manifest.full_uri), s.uri);
+        }
+        s.file = path.join(path.dirname(manifest.file), s.uri);
+      });
+
+      // Note: important for thi to be AFTER the uri adjustment above and BEFORE marking items as visited below
+      updateVODManifest(manifest);
+
+
+      // SEGMENTS: update duration and push if not already visted
+      manifest.parsed.segments.forEach(function(s) {
+        if (!s.uri) {
+          return;
+        }
+
         // If already processed, skip it
         if (manifest.visited[s.uri]) {
           return;
         }
-        manifest.visited[s.uri] = manifest;
+        manifest.visited[s.uri] = true;
 
-        s.file = path.join(path.dirname(manifest.file), s.uri);
-
-        s.full_uri = s.uri;
-        if (!utils.isAbsolute(s.full_uri)) {
-          s.full_uri = utils.joinURI(path.dirname(manifest.full_uri), s.full_uri);
-        }
         //console.log(s.uri+' | '+s.full_uri+' | '+s.file);
 
         if (typeof s.duration !== 'undefined')
@@ -137,9 +162,12 @@ const internalWalkSubPlaylist = function(options, manifest) {
         resources.push(s);
       });
 
+
+      // Update the manifest content to be the VOD equivalent and oush to write the file
       if (manifest.content) {
         manifest.content = hls_generator(manifest.vod);
       }
+      resources.push(manifest);
 
       resolve(resources);
     }) // request promise
@@ -153,7 +181,8 @@ const internalWalkSubPlaylist = function(options, manifest) {
   })
 };
 
-const updateVODPlaylist = function(manifest) {
+// Given the live manifest model, create or update an equivalent VOD manifest
+const updateVODManifest = function(manifest) {
 
   // First time, use the live playlist as the starting point
   if (!manifest.vod) {

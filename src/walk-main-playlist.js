@@ -5,6 +5,28 @@ const utils = require('./utils');
 const hls_utils = require('./hls-utils');
 const writeData = require('./write-data');
 const walkSubPlaylist = require('./walk-sub-playlist');
+const url = require('url');
+
+const makeURLsRelative= function(str) {
+  let body = "";
+
+  var parts = str.split(/\r?\n/);
+  for (var i = 0; i < parts.length; i++) {
+    let line = parts[i];
+
+    if (!line.startsWith('#EXT') && line.length > 0) {
+      const parsed = url.parse(line);
+      if (parsed.pathname && parsed.protocol) {
+        body += utils.urlPathname(line) + '\n';
+        continue;
+      }
+    }
+    body += line + '\n';
+  }
+
+  return body;
+
+}
 
 const walkMainPlaylist = function(options) {
   return new Promise(function(resolve, reject) {
@@ -39,10 +61,6 @@ const walkMainPlaylist = function(options) {
         manifestError.reponse = {body: response.body, headers: response.headers};
         return utils.onError(manifestError, manifest.uri, reject);
       }
-      // Only push manifest uris that get a non 200 and don't timeout
-
-      // console.log(`Main playlist: ${manifest.uri}`);
-      // console.log(response.body);
 
       manifest.content = response.body;
 
@@ -51,23 +69,35 @@ const walkMainPlaylist = function(options) {
       manifest.parsed.playlists = manifest.parsed.playlists || [];
       manifest.parsed.mediaGroups = manifest.parsed.mediaGroups || {};
 
+
+      // After we parsed, let change the content so absolute URLs become relative URls
+      manifest.content = makeURLsRelative(manifest.content);
+
       resources.push(manifest);
 
       writeData([manifest], options);
 
       const playlists = manifest.parsed.playlists.concat(hls_utils.mediaGroupPlaylists(manifest.parsed.mediaGroups));
 
+
       const subs = playlists.map(function(playlist) {
-        return walkSubPlaylist(
-          {
-            uri:      playlist.uri,
+          let opts = {
+            uri: playlist.uri,
             basedir:  path.dirname(manifest.file),
             baseuri:  path.dirname(manifest.full_uri),
             seconds:  options.seconds,
             verbose:  options.verbose,
             concurrency: options.concurrency
-          });
-      });
+          };
+
+          // if uri has protocol and adress, tweak the options so uri is relative and baseuri is correct
+          if (utils.isAbsolute(playlist.uri)) {
+            opts.uri = utils.urlPathnameWithQuery(playlist.uri);
+            const parsed = url.parse(playlist.uri);
+            opts.baseuri = parsed.protocol+"//"+parsed.hostname+"/";   // TODO: make util fcn
+          }
+          return walkSubPlaylist(opts);
+        });
 
 
       Promise.all(subs).then(function() {

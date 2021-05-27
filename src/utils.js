@@ -26,8 +26,22 @@ const urlBasename = function(uri) {
 
 const urlPathname = function(uri) {
   const parsed = url.parse(uri);
-  const pathname = parsed.pathname || parsed.path.replace(parsed.query || '', '');
+  let pathname = parsed.pathname || parsed.path.replace(parsed.query || '', '');
+  if (pathname.startsWith('/')) {
+    pathname = pathname.slice(1);
+  }
+
   return fsSanitize(pathname);
+};
+
+const urlPathnameWithQuery = function(uri) {
+  const parsed = url.parse(uri);
+  let p = parsed.path;
+  if (p.startsWith('/')) {
+    p = p.slice(1);
+  }
+
+  return p;
 };
 
 const joinURI = function(absolute, relative) {
@@ -73,6 +87,7 @@ module.exports = {
   fsSanitize,
   urlBasename,
   urlPathname,
+  urlPathnameWithQuery,
   joinURI,
   isAbsolute,
   onError

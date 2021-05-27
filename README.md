@@ -2,7 +2,9 @@
 
 A CLI tool to fetch a specified number of seconds of a live HLS manifest and its segments and save it all locally as a VOD HLS files.
 
-This has been tested with a limited set of HLS live URLs that I needed to use.
+## Caveats
+
+This has been tested with a limited set of HLS live URLs that I needed to use
 
 Has been tested with at least one HLS stream from:
 - Wowza
